@@ -1,0 +1,149 @@
+// ---------- PANEL CREATOR ----------
+function createPanel(ref, maxNumber) {
+    return {
+        maxNum: maxNumber,
+        num1: 0,
+        num2: 0,
+        answer: 0,
+        timer: null,
+        startTime: 0,
+        totalSeconds: 0,
+        count: 0,
+        marks: 0,
+        progress: 0,
+
+        qElem: document.querySelector(`#${ref} .question`),
+        aElem: document.querySelector(`#${ref} .answer`),
+        tElem: document.querySelector(`#${ref} .timer`),
+        sElem: document.querySelector(`#${ref} .status`),
+        marksElem: document.querySelector(`#${ref} .marks`),
+        totalTimeElem: document.querySelector(`#${ref} .totalTime`),
+
+        progressElem: document.getElementById(ref === "panel1" ? "p1_progress" : "p2_progress")
+    };
+}
+
+let panel1 = createPanel("panel1", 70);
+let panel2 = createPanel("panel2", 99);
+
+// ---------- TIME FORMAT ----------
+function formatTime(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return `${m}:${s}`;
+}
+
+// ---------- NEW QUESTION ----------
+function newQuestion(panel) {
+    panel.num1 = Math.floor(Math.random() * panel.maxNum) + 1;
+    panel.num2 = Math.floor(Math.random() * panel.maxNum) + 1;
+    panel.answer = panel.num1 + panel.num2;
+
+    panel.count++;
+    panel.qElem.textContent = `${panel.num1} + ${panel.num2}`;
+    panel.aElem.textContent = "";
+    panel.aElem.style.color = "black";
+    panel.sElem.textContent = `Question ${panel.count}`;
+
+    resetTimer(panel);
+}
+
+// ---------- RESET TIMER ----------
+function resetTimer(panel) {
+    clearInterval(panel.timer);
+    panel.startTime = Date.now();
+    panel.timer = setInterval(() => updateTimer(panel), 1000);
+}
+
+function updateTimer(panel) {
+    const elapsed = Math.floor((Date.now() - panel.startTime) / 1000);
+    panel.tElem.textContent = formatTime(elapsed);
+}
+
+// ---------- SHOW ANSWER ----------
+function showAnswer(panel) {
+    clearInterval(panel.timer);
+
+    const elapsed = Math.floor((Date.now() - panel.startTime) / 1000);
+    panel.totalSeconds += elapsed;
+    panel.totalTimeElem.textContent = formatTime(panel.totalSeconds);
+
+    panel.aElem.textContent = panel.answer;
+    panel.aElem.style.color = "green";
+
+    panel.marks++;
+    panel.marksElem.textContent = panel.marks;
+
+    panel.progress = Math.min(100, panel.progress + 10);
+    panel.progressElem.style.width = panel.progress + "%";
+
+    updateLeaderboard();
+}
+
+// ---------- LEADERBOARD ----------
+function updateLeaderboard() {
+    const board = document.getElementById("boardContent");
+
+    const kid1Score = panel1.marks;
+    const kid2Score = panel2.marks;
+
+    board.innerHTML = `
+        <p>Kid 1 → Marks: ${panel1.marks} | Time: ${formatTime(panel1.totalSeconds)}</p>
+        <p>Kid 2 → Marks: ${panel2.marks} | Time: ${formatTime(panel2.totalSeconds)}</p>
+        <hr>
+        <h3>Ranking:</h3>
+        <p>${
+            kid1Score > kid2Score
+                ? "🥇 Kid 1 is Winning!"
+                : kid2Score > kid1Score
+                ? "🥇 Kid 2 is Winning!"
+                : "🤝 Tie!"
+        }</p>
+    `;
+}
+
+// ---------- DARK MODE ----------
+document.getElementById("darkToggle").onclick = () => {
+    document.body.classList.toggle("dark");
+};
+
+// ---------- CUSTOM KEY MAPPING ----------
+let keys = {
+    k1new: "a",
+    k1ans: "s",
+    k2new: "l",
+    k2ans: ";"
+};
+
+// Load saved keys
+if (localStorage.keys) {
+    keys = JSON.parse(localStorage.keys);
+}
+
+document.getElementById("k1_new").value = keys.k1new;
+document.getElementById("k1_ans").value = keys.k1ans;
+document.getElementById("k2_new").value = keys.k2new;
+document.getElementById("k2_ans").value = keys.k2ans;
+
+document.getElementById("saveKeys").onclick = () => {
+    keys.k1new = document.getElementById("k1_new").value;
+    keys.k1ans = document.getElementById("k1_ans").value;
+    keys.k2new = document.getElementById("k2_new").value;
+    keys.k2ans = document.getElementById("k2_ans").value;
+
+    localStorage.keys = JSON.stringify(keys);
+};
+
+// ---------- KEYBOARD HANDLING ----------
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === keys.k1new) newQuestion(panel1);
+    if (e.key === keys.k1ans) showAnswer(panel1);
+
+    if (e.key === keys.k2new) newQuestion(panel2);
+    if (e.key === keys.k2ans) showAnswer(panel2);
+});
+// SETTINGS MODAL
+const modal = document.getElementById("settingsModal");
+document.getElementById("settingsBtn").onclick = () => modal.style.display = "flex";
+document.getElementById("closeModal").onclick = () => modal.style.display = "none";
