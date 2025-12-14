@@ -13,7 +13,8 @@ function createPanel(ref, maxNumber) {
         progress: 0,
 
         qElem: document.querySelector(`#${ref} .question`),
-        aElem: document.querySelector(`#${ref} .answer`),
+        resultElem: document.querySelector(`#${ref} .answerResult`),
+        inputElem: document.querySelector(`#${ref} .answerField`),
         tElem: document.querySelector(`#${ref} .timer`),
         sElem: document.querySelector(`#${ref} .status`),
         marksElem: document.querySelector(`#${ref} .marks`),
@@ -65,8 +66,10 @@ function showAnswer(panel) {
     clearInterval(panel.timer);
 
     const elapsed = Math.floor((Date.now() - panel.startTime) / 1000);
-    panel.totalSeconds += elapsed;
-    panel.totalTimeElem.textContent = formatTime(panel.totalSeconds);
+panel.totalSeconds += elapsed;
+panel.totalTimeElem.textContent = panel.totalSeconds < 3600 ? 
+    formatTime(panel.totalSeconds) : 
+    `${Math.floor(panel.totalSeconds / 3600)}:${formatTime(panel.totalSeconds % 3600)}`;
 
     panel.aElem.textContent = panel.answer;
     panel.aElem.style.color = "green";
@@ -154,12 +157,27 @@ document.getElementById("saveKeys").onclick = () => {
 
 // ---------- KEYBOARD HANDLING ----------
 document.addEventListener("keydown", (e) => {
-
+    // Find Mode Shortcut (Shift + .)
+    if (e.shiftKey && e.key === '.') {
+        panel1.inputElem.focus();
+        return;
+    }
+    
+    // Handlers for speech2 code (direct select)
     if (e.key === keys.k1new) newQuestion(panel1);
     if (e.key === keys.k1ans) showAnswer(panel1);
-
+    
     if (e.key === keys.k2new) newQuestion(panel2);
     if (e.key === keys.k2ans) showAnswer(panel2);
+});
+
+// Enter key submission handlers
+panel1.inputElem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') createAnswerHandler('panel1')();
+});
+
+panel2.inputElem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') createAnswerHandler('panel2')();
 });
 
 // Add answer submission handlers
