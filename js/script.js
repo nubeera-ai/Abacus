@@ -19,11 +19,13 @@ function createPanel(ref, maxNumber) {
         sElem: document.querySelector(`#${ref} .status`),
         marksElem: document.querySelector(`#${ref} .marks`),
         totalTimeElem: document.querySelector(`#${ref} .totalTime`),
+        aElem: document.querySelector(`#${ref} .answerResult`),
 
         progressElem: document.getElementById(ref === "panel1" ? "p1_progress" : "p2_progress")
     };
 }
 
+let isSinglePlayer = false;
 let panel1 = createPanel("panel1", 70);
 let panel2 = createPanel("panel2", 99);
 
@@ -87,23 +89,54 @@ panel.totalTimeElem.textContent = panel.totalSeconds < 3600 ?
 function updateLeaderboard() {
     const board = document.getElementById("boardContent");
 
-    const kid1Score = panel1.marks;
-    const kid2Score = panel2.marks;
+    if (isSinglePlayer) {
+        board.innerHTML = `
+            <p>Player 1 → Marks: ${panel1.marks} | Time: ${formatTime(panel1.totalSeconds)}</p>
+            <hr>
+            <h3>Keep Going!</h3>
+        `;
+    } else {
+        const kid1Score = panel1.marks;
+        const kid2Score = panel2.marks;
 
-    board.innerHTML = `
-        <p>Kid 1 → Marks: ${panel1.marks} | Time: ${formatTime(panel1.totalSeconds)}</p>
-        <p>Kid 2 → Marks: ${panel2.marks} | Time: ${formatTime(panel2.totalSeconds)}</p>
-        <hr>
-        <h3>Ranking:</h3>
-        <p>${
-            kid1Score > kid2Score
-                ? "🥇 Kid 1 is Winning!"
-                : kid2Score > kid1Score
-                ? "🥇 Kid 2 is Winning!"
-                : "🤝 Tie!"
-        }</p>
-    `;
+        board.innerHTML = `
+            <p>Kid 1 → Marks: ${panel1.marks} | Time: ${formatTime(panel1.totalSeconds)}</p>
+            <p>Kid 2 → Marks: ${panel2.marks} | Time: ${formatTime(panel2.totalSeconds)}</p>
+            <hr>
+            <h3>Ranking:</h3>
+            <p>${
+                kid1Score > kid2Score
+                    ? "🥇 Kid 1 is Winning!"
+                    : kid2Score > kid1Score
+                    ? "🥇 Kid 2 is Winning!"
+                    : "🤝 Tie!"
+            }</p>
+        `;
+    }
 }
+
+// ---------- MODE TOGGLE ----------
+document.getElementById("modeToggle").onclick = () => {
+    isSinglePlayer = !isSinglePlayer;
+    document.body.classList.toggle("single-player-mode");
+    
+    const btn = document.getElementById("modeToggle");
+    const h2 = document.querySelector("#panel1 h2");
+    
+    if (isSinglePlayer) {
+        btn.textContent = "👥 2 Players";
+        h2.innerHTML = `Player 1 - Marks: <span class="marks">${panel1.marks}</span> | Time: <span class="totalTime">${formatTime(panel1.totalSeconds)}</span>`;
+    } else {
+        btn.textContent = "👤 1 Player";
+        h2.innerHTML = `Kid 1 - Marks: <span class="marks">${panel1.marks}</span> | Time: <span class="totalTime">${formatTime(panel1.totalSeconds)}</span>`;
+    }
+    
+    // Re-bind elements for panel1 because innerHTML overwrite destroyed previous references
+    panel1.marksElem = h2.querySelector(".marks");
+    panel1.totalTimeElem = h2.querySelector(".totalTime");
+    
+    updateLeaderboard();
+};
 
 // ---------- DARK MODE ----------
 document.getElementById("darkToggle").onclick = () => {
@@ -167,8 +200,10 @@ document.addEventListener("keydown", (e) => {
     if (e.key === keys.k1new) newQuestion(panel1);
     if (e.key === keys.k1ans) showAnswer(panel1);
     
-    if (e.key === keys.k2new) newQuestion(panel2);
-    if (e.key === keys.k2ans) showAnswer(panel2);
+    if (!isSinglePlayer) {
+        if (e.key === keys.k2new) newQuestion(panel2);
+        if (e.key === keys.k2ans) showAnswer(panel2);
+    }
 });
 
 // Enter key submission handlers

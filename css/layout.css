@@ -39,6 +39,20 @@
     transform: translateY(-5px);
 }
 
+/* SINGLE PLAYER MODE */
+body.single-player-mode #mainContainer {
+    justify-content: center;
+}
+
+body.single-player-mode #panel2 {
+    display: none;
+}
+
+body.single-player-mode .panel {
+    width: 60%;
+    max-width: 800px;
+}
+
 /* MODAL POPUP */
 #settingsModal {
     position: fixed;
