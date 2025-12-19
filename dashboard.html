@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        .dashboard {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .dashboard h1 {
+            margin-bottom: 20px;
+        }
+        .dashboard button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .single {
+            background: #4CAF50;
+            color: white;
+        }
+        .multi {
+            background: #2196F3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h1>Game Dashboard</h1>
+
+    <button class="single" onclick="location.href='single.html'">
+        🎮 Single Player
+    </button>
+
+    <button class="multi" onclick="location.href='index.html'">
+        👥 Multiplayer
+    </button>
+</div>
+
+</body>
+</html>
